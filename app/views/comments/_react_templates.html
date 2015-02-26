@@ -1,0 +1,60 @@
+<script type="text/jsx">
+  /** @jsx React.DOM */
+  var Comment = React.createClass({
+    render: function() {
+      return (
+        <div className="comment">
+          <span>
+            <b>{this.props.author}: </b>
+          </span>
+
+          <span>
+            <em>{this.props.content}</em>
+          </span>
+
+          {this.props.children}
+        </div>
+      );
+    }
+  });
+
+  var CommentList = React.createClass({
+    render: function() {
+      return (
+        <div className="commentList">
+          <Comment author="Damian Jaszczurowski" content="absolutely amazing" >
+            <div>
+              <i>You may pass the anything to React component, which will be accessible as children property</i>
+            </div>
+          </Comment>
+          <Comment author="Billy Kid" content="must agree..." />
+        </div>
+      );
+    }
+  });
+
+  var CommentForm = React.createClass({
+    render: function() {
+      return (
+        <div className="commentForm">
+          CommentForm content
+        </div>
+      )
+    }
+  });
+
+  var CommentBox = React.createClass({
+    render: function() {
+      return (
+        <div className="commentBox">
+          These are the comments:
+          <CommentList />
+          Enter new comment:
+          <CommentForm />
+        </div>
+      );
+    }
+  });
+
+  React.render(<CommentBox />, document.getElementById('content'))
+</script>
