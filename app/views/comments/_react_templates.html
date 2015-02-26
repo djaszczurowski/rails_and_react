@@ -1,7 +1,11 @@
 <script type="text/jsx">
+  var markdownConverter = new Showdown.converter();
+
   /** @jsx React.DOM */
   var Comment = React.createClass({
     render: function() {
+      var contentMarkdown = markdownConverter.makeHtml((this.props.children || '').toString())
+
       return (
         <div className="comment">
           <span>
@@ -12,7 +16,7 @@
             <em>{this.props.content}</em>
           </span>
 
-          {this.props.children}
+          <span dangerouslySetInnerHTML={{__html: contentMarkdown}} />
         </div>
       );
     }
@@ -23,9 +27,9 @@
       return (
         <div className="commentList">
           <Comment author="Damian Jaszczurowski" content="absolutely amazing" >
-            <div>
-              <i>You may pass the anything to React component, which will be accessible as children property</i>
-            </div>
+            ```
+              var foo = 'It may event render the markdown!';
+            ```
           </Comment>
           <Comment author="Billy Kid" content="must agree..." />
         </div>
