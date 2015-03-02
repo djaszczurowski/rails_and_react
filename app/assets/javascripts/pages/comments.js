@@ -40,11 +40,40 @@ var CommentList = React.createClass({
 });
 
 var CommentForm = React.createClass({
+  _handleSubmit: function(event) {
+    event.preventDefault();
+
+    var form = {
+      author: this.refs.author.getDOMNode().value.trim(),
+      content: this.refs.content.getDOMNode().value.trim(),
+      markdown: this.refs.markdown.getDOMNode().value.trim(),
+    }
+
+    if (form.author && form.content) {
+      this.refs.author.getDOMNode().value = '';
+      this.refs.content.getDOMNode().value = '';
+      this.refs.markdown.getDOMNode().value = '';
+
+      $.ajax({
+        type: 'POST',
+        url: "api/comments",
+        data: { comment: form },
+        dataType: "json",
+        success: function() {
+          console.log("comment created success")
+        }
+      })
+    }
+
+  },
   render: function() {
     return (
-      <div className="commentForm">
-        CommentForm content
-      </div>
+      <form className="commentForm" onSubmit={this._handleSubmit}>
+        <input type="text" placeholder="Your name" ref="author"/>
+        <input type="text" placeholder="Content of your comment" ref="content" />
+        <input type="text" placeholder="markdown (optional)" ref="markdown"/>
+        <input type="submit" value="Post" />
+      </form>
     )
   }
 });
@@ -71,7 +100,7 @@ var CommentBox = React.createClass({
   },
   componentDidMount: function() {
     this._fetchComments();
-    setInterval(this._fetchComments, this.props.interval || 100)
+    setInterval(this._fetchComments, this.props.interval || 1500)
   },
   render: function() {
     return (
