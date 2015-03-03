@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   root 'comments#index'
 
   namespace 'api' do
-    resources :comments
+    resources :comments, except: :create
   end
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
