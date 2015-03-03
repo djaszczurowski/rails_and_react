@@ -1,17 +1,20 @@
 class Api::LiveCommentsController < Api::LiveController
 
   def create
-    model = Comment.new(create_params)
+    comment = Comment.new(comment_param)
 
-    model.save ?
-      trigger_success(model) :
-      trigger_failure(model)
+    if comment.valid? && comment.save
+      WebsocketRails[:comments].trigger(:created, comment)
+      trigger_success(comment)
+    else
+      trigger_failure(comment)
+    end
   end
 
   private
 
-  def create_params
-    params.require(:comment).permit(:author, :content, :markdown)
+  def comment_param
+    message.fetch(:comment)
   end
 
 end

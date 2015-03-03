@@ -43,28 +43,16 @@ var CommentForm = React.createClass({
   _handleSubmit: function(event) {
     event.preventDefault();
 
-    var form = {
+    var comment = {
       author: this.refs.author.getDOMNode().value.trim(),
       content: this.refs.content.getDOMNode().value.trim(),
       markdown: this.refs.markdown.getDOMNode().value.trim(),
     }
 
-    if (form.author && form.content) {
-      this.refs.author.getDOMNode().value = '';
-      this.refs.content.getDOMNode().value = '';
-      this.refs.markdown.getDOMNode().value = '';
+    var onSuccess = function(comment) {};
+    var onFailure = function(comment) { console.log("comment creations failure"); };
 
-      $.ajax({
-        type: 'POST',
-        url: "api/comments",
-        data: { comment: form },
-        dataType: "json",
-        success: function() {
-          console.log("comment created success")
-        }
-      })
-    }
-
+    window._dispatcher.trigger("create_comment", {comment: comment}, onSuccess, onFailure);
   },
   render: function() {
     return (
@@ -79,7 +67,7 @@ var CommentForm = React.createClass({
 });
 
 var CommentBox = React.createClass({
-  _fetchComments: function() {
+  _fetchInitComments: function() {
     var that = this;
 
     $.ajax(
@@ -87,7 +75,10 @@ var CommentBox = React.createClass({
         url: this.props.url,
         dataType: 'json',
         success: function(data) {
-          that.setState({data: data});
+          var newState = that.state;
+          newState.data = data;
+
+          that.setState(newState);
         },
         error: function() {
           console.log("error")
@@ -95,12 +86,23 @@ var CommentBox = React.createClass({
       }
     )
   },
+  _bindDispather: function() {
+    var commentsChannel = window._dispatcher.subscribe("comments");
+    var that = this;
+
+    commentsChannel.bind("created", function(comment) {
+      var newState = that.state;
+      newState.data.push(comment);
+
+      that.setState(newState);
+    });
+  },
   getInitialState: function() {
     return { data: [] }
   },
   componentDidMount: function() {
-    this._fetchComments();
-    setInterval(this._fetchComments, this.props.interval || 1500)
+    this._fetchInitComments();
+    this._bindDispather();
   },
   render: function() {
     return (
@@ -112,4 +114,6 @@ var CommentBox = React.createClass({
     );
   }
 });
+
+window._dispatcher = new WebSocketRails("localhost:3000/websocket")
 React.render(<CommentBox url="api/comments" />, document.getElementById("content"))
